@@ -13,6 +13,8 @@ use core::panic::PanicInfo;
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
+    #[cfg(test)]
+    exit_qemu(QemuExitCode::Fail);
     loop {}
 }
 
@@ -31,6 +33,23 @@ fn test_runner(tests: &[&dyn Fn()]) {
     println!("Running {} tests", tests.len());
     for test in tests {
         test();
+    }
+    exit_qemu(QemuExitCode::Success)
+}
+
+#[derive(Debug, Copy, Clone, Eq, PartialEq)]
+#[repr(u32)]
+enum QemuExitCode {
+    Success = 0x10,
+    Fail = 0x11
+}
+
+fn exit_qemu(exit_code: QemuExitCode) {
+    use x86_64::instructions::port::Port;
+
+    let mut port = Port::new(0xf4);
+    unsafe {
+        port.write(exit_code as u32);
     }
 }
 
