@@ -16,7 +16,12 @@ volatile = "0.2.6"
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 spin = "0.7.0"
 x86_64 = "0.12.3"
+uart_16550 = "0.2.10"
 
 [package.metadata.bootimage]
-test-args = ["-device", "isa-debug-exit,iobase=0xf4,iosize=0x04"]
+test-args = [
+    "-device", "isa-debug-exit,iobase=0xf4,iosize=0x04", # setup I/O port to exit QEMU from tests
+    "-serial", "stdio", # redirect serial port output to stdout
+    "-display", "none", # don't show QEMU window in tests
+]
 test-success-exit-code = 33 # (QemuExitCode::Success as u32 << 1) | 1
