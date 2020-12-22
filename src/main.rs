@@ -6,10 +6,11 @@
 
 #![reexport_test_harness_main = "test_entry_point"]
 
+use core::any;
+use core::panic::PanicInfo;
+
 mod vga_buffer;
 mod serial;
-
-use core::panic::PanicInfo;
 
 #[cfg(not(test))]
 #[panic_handler]
@@ -40,10 +41,10 @@ pub extern "C" fn _start() -> ! {
 }
 
 #[cfg(test)]
-fn test_runner(tests: &[&dyn Fn()]) {
+fn test_runner(tests: &[&dyn Testable]) {
     serial_println!("Running {} tests", tests.len());
     for test in tests {
-        test();
+        test.run();
     }
     exit_qemu(QemuExitCode::Success)
 }
@@ -66,14 +67,22 @@ fn exit_qemu(exit_code: QemuExitCode) {
 
 #[test_case]
 fn trivial_test_ok() {
-    serial_print!("trivial assertion ok...");
     assert_eq!(1, 1);
-    serial_println!("[ok]");
 }
 
 #[test_case]
 fn trivial_test_fail() {
-    serial_print!("trivial assertion fail...");
     assert_eq!(1, 2);
-    serial_println!("[ok]");
+}
+
+trait Testable {
+    fn run(&self) -> ();
+}
+
+impl<T: Fn()> Testable for T {
+    fn run(&self) -> () {
+        serial_print!("{}...\t", any::type_name::<T>());
+        self();
+        serial_println!("[ok]")
+    }
 }
