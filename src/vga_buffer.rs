@@ -138,3 +138,35 @@ macro_rules! println {
 pub fn _print(args: fmt::Arguments) {
     VGA_WRITER.lock().write_fmt(args).unwrap();
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test_case]
+    fn test_simple_print() {
+        println!("simple output");
+    }
+
+    #[test_case]
+    fn test_formatting() {
+        println!("{} {}", "simple", "output")
+    }
+
+    #[test_case]
+    fn test_print_many_lines() {
+        for i in 0..500 {
+            println!("line {}", i);
+        }
+    }
+
+    #[test_case]
+    fn test_output() {
+        let s = "single line text";
+        println!("{}", s);
+        for (i, expected_char) in s.chars().enumerate() {
+            let screen_char: ScreenChar = VGA_WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
+            assert_eq!(char::from(screen_char.ascii_character), expected_char)
+        }
+    }
+}
