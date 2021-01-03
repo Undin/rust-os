@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["Arseniy Pendryak <a.pendryak@yandex.ru>"]
 edition = "2018"
 
+[[test]]
+name = "should_panic"
+harness = false
+
 [profile.dev]
 panic = "abort"
 
