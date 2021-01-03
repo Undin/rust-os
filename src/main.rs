@@ -32,13 +32,3 @@ pub extern "C" fn _start() -> ! {
 
     loop {}
 }
-
-#[test_case]
-fn trivial_test_ok() {
-    assert_eq!(1, 1);
-}
-
-#[test_case]
-fn trivial_test_fail() {
-    assert_eq!(1, 2);
-}
