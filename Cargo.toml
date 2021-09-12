@@ -8,6 +8,10 @@ edition = "2018"
 name = "should_panic"
 harness = false
 
+[[test]]
+name = "stack_overflow"
+harness = false
+
 [profile.dev]
 panic = "abort"
 
