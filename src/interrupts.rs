@@ -1,4 +1,6 @@
 use lazy_static::lazy_static;
+use pic8259::ChainedPics;
+use spin::Mutex;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
 use crate::gdt;
@@ -28,6 +30,11 @@ extern "x86-interrupt" fn double_fault_handler(frame: InterruptStackFrame, _erro
 pub fn init_idt() {
     IDT.load()
 }
+
+const PIC1_OFFSET: u8 = 32;
+const PIC2_OFFSET: u8 = PIC1_OFFSET + 8;
+
+pub static PICS: Mutex<ChainedPics> = Mutex::new(unsafe { ChainedPics::new(PIC1_OFFSET, PIC2_OFFSET) });
 
 #[test_case]
 fn test_breakpoint_exception() {
