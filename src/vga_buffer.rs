@@ -165,10 +165,14 @@ mod tests {
     #[test_case]
     fn test_output() {
         let s = "single line text";
-        println!("{}", s);
-        for (i, expected_char) in s.chars().enumerate() {
-            let screen_char: ScreenChar = VGA_WRITER.lock().buffer.chars[BUFFER_HEIGHT - 2][i].read();
-            assert_eq!(char::from(screen_char.ascii_character), expected_char)
-        }
+        x86_64::instructions::interrupts::without_interrupts(|| {
+            let mut writer = VGA_WRITER.lock();
+            writeln!(writer, "\n{}", s) // \n is needed here to avoid `.` printed by timer interrupt handler
+                .expect("writeln failed");
+            for (i, expected_char) in s.chars().enumerate() {
+                let screen_char: ScreenChar = writer.buffer.chars[BUFFER_HEIGHT - 2][i].read();
+                assert_eq!(char::from(screen_char.ascii_character), expected_char)
+            }
+        });
     }
 }
