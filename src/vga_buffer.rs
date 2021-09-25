@@ -136,7 +136,9 @@ macro_rules! println {
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    VGA_WRITER.lock().write_fmt(args).unwrap();
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        VGA_WRITER.lock().write_fmt(args).unwrap();
+    });
 }
 
 #[cfg(test)]

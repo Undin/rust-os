@@ -28,5 +28,7 @@ macro_rules! serial_println {
 
 #[doc(hidden)]
 pub fn _print(args: fmt::Arguments) {
-    SERIAL1.lock().write_fmt(args).unwrap();
+    x86_64::instructions::interrupts::without_interrupts(|| {
+        SERIAL1.lock().write_fmt(args).unwrap();
+    });
 }
