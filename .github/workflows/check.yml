@@ -1,0 +1,48 @@
+name: check
+
+on:
+    push:
+        branches:
+            - master
+    pull_request:
+    workflow_dispatch:
+
+# Allow cancelling all previous runs for the same branch
+# See https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#concurrency
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    check:
+        runs-on: ubuntu-18.04
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v2
+
+            -   name: Set up qemu
+                run: |
+                    sudo apt-get update
+                    sudo apt-get install qemu
+
+            -   name: Set up Rust
+                uses: actions-rs/toolchain@v1
+                with:
+                    profile: minimal
+                    toolchain: nightly
+                    components: rust-src, llvm-tools-preview
+                    default: true
+
+            -   name: Install bootimage
+                uses: actions-rs/cargo@v1
+                with:
+                    command: install
+                    args: bootimage
+
+            -   name: Check
+                env:
+                    CARGO_PROFILE_DEV_PANIC: unwind
+                uses: actions-rs/cargo@v1
+                with:
+                    command: test
+
