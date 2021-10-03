@@ -29,6 +29,9 @@ pub extern "C" fn _start() -> ! {
 
     rust_os::init();
 
+    let (phys_frame, _) = x86_64::registers::control::Cr3::read();
+    println!("Level 4 page table at: {:?}", phys_frame.start_address());
+
     #[cfg(test)]
     test_entry_point();
 
